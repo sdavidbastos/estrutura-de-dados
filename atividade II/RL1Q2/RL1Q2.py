@@ -31,6 +31,11 @@ class Pilha:
     def get_pilha(self):
         return self.S
 
+class PilhaComposta():
+    def __init__(self, tamanho):
+        self.pilha_principal = Pilha(tamanho)
+        self.pilha_auxiliar = Pilha(tamanho)
+
 
 class Base():
 
@@ -104,6 +109,7 @@ class Base():
 class RespostaRL1Q2(Base):
 
     matriz_inicial = None
+    matriz_pilha = None
 
     def __init__(self, arquivo):
         self.arquivo = arquivo
@@ -111,19 +117,29 @@ class RespostaRL1Q2(Base):
 
     def tratar_arquivo(self, arquivo):
         tamanho = len(arquivo)
-        matriz = self.criar_array(tamanho)
+        matriz_temporaria = self.criar_array(tamanho)
         for i in range(tamanho):
             linha_atual = arquivo[i].strip().split(" ")
-            matriz[i] = linha_atual
-        return matriz
+            matriz_temporaria[i] = linha_atual
+        return matriz_temporaria
 
     def criar_matriz_pilhas(self, matriz):
-        matriz_temporaria = self.clonar_matriz_vazia_2d(matriz)
-        print(matriz_temporaria)
+        tamanho = len(matriz)
+        array_temporaria = self.criar_array(tamanho)
+        
+        for i in range(tamanho):
+            tamanho_linha = len(matriz[i])
+            array_temporaria[i] = PilhaComposta(tamanho_linha)
+        
+        return array_temporaria
+    
 
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
         self.matriz_inicial = self.tratar_arquivo(self.arquivo)
+        self.matriz_pilha = self.criar_matriz_pilhas(self.matriz_inicial)
 
 
-RespostaRL1Q2(arquivo)
+resposta = RespostaRL1Q2(arquivo)
+
+print(resposta.matriz_pilha)
