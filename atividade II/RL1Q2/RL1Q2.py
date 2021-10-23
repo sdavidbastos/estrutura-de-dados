@@ -109,7 +109,7 @@ class Base():
 class RespostaRL1Q2(Base):
 
     matriz_inicial = None
-    matriz_pilha = None
+    array_pilha = None
 
     def __init__(self, arquivo):
         self.arquivo = arquivo
@@ -123,7 +123,7 @@ class RespostaRL1Q2(Base):
             matriz_temporaria[i] = linha_atual
         return matriz_temporaria
 
-    def criar_matriz_pilhas(self, matriz):
+    def criar_array_pilha(self, matriz):
         tamanho = len(matriz)
         array_temporaria = self.criar_array(tamanho)
         
@@ -137,9 +137,7 @@ class RespostaRL1Q2(Base):
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
         self.matriz_inicial = self.tratar_arquivo(self.arquivo)
-        self.matriz_pilha = self.criar_matriz_pilhas(self.matriz_inicial)
+        self.array_pilha = self.criar_array_pilha(self.matriz_inicial)
 
 
 resposta = RespostaRL1Q2(arquivo)
-
-print(resposta.matriz_pilha)
