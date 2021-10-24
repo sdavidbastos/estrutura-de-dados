@@ -181,7 +181,7 @@ class RespostaRL1Q1(Base):
 
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
-        self.matriz_resultados = self.tratar_arquivo(arquivo)
+        self.matriz_resultados = self.tratar_arquivo(self.arquivo)
         self.matriz_chave_valor = self.criar_matriz_chave_valor(
             self.matriz_resultados)
         self.matriz_soma = self.criar_matriz_soma_ordenado(
