@@ -7,6 +7,11 @@ class Pilha:
         self.pilha = [None] * tam
         self.topo = -1
 
+    def elemento_topo(self):
+        if(self.esta_vazia()):
+            return False
+        return self.pilha[self.topo]
+
     def esta_vazia(self):
         return self.topo == -1
 
@@ -18,23 +23,15 @@ class Pilha:
             self.topo = self.topo + 1
             self.pilha[self.topo] = novo
 
-            return True
+            return novo
         return False
 
-    def desempilheirar(self):
+    def desempilhar(self):
         if not self.esta_vazia():
             self.topo = self.topo - 1
             return self.pilha[self.topo + 1]
 
         return False
-
-    def get_pilha(self):
-        return self.S
-
-class PilhaComposta():
-    def __init__(self, tamanho):
-        self.pilha_principal = Pilha(tamanho)
-        self.pilha_auxiliar = Pilha(tamanho)
 
 
 class Base():
@@ -105,14 +102,113 @@ class Base():
             total = total + array[i]
         return total
 
+# Para cada nome da lista e necessario criar um resultado
+
+
+class Resultado():
+    pushes = ""
+    pops = 0
+
+    def escrever_resultado(self):
+        resposta = self.pushes.strip()
+        resposta_final = f"{self.pops}x-pop {resposta}"
+        if(self.pops <= 0):
+            resposta_final = resposta
+        return resposta_final
+
+
+"""
+Para conseguir executar os pushes o pops sem perder os dados, optei por
+utilizar uma pilha principal e auxiliar
+"""
+
+
+class PilhaComposta(Base):
+
+    def __init__(self, array_nomes):
+        self.array_nomes = array_nomes
+        self.tamanho = len(array_nomes)
+        self.pilha_principal = Pilha(self.tamanho)
+        self.pilha_auxiliar = Pilha(self.tamanho)
+        self.array_resultados = self.criar_array(self.tamanho)
+        self.inserir_nomes()
+
+    def inserir_nomes(self):
+        # Primeiro nome da pilha não precisa de validacao
+        primeiro_nome = self.pilha_principal.empilhar(self.array_nomes[0])
+        resultado = Resultado()
+        resultado.pushes = "push-" + primeiro_nome
+        self.array_resultados[0] = resultado
+
+        for i in range(1, self.tamanho):
+            nome_atual = self.array_nomes[i]
+
+            # O indice vai indicar em qual resultado temos que trabalhar
+            self.inserir_nome(nome_atual, i)
+
+    def inserir_nome(self, nome_atual, index):
+        resultado_atual = Resultado()
+
+        self.inserir_nomes_na_pilha_auxiliar(nome_atual, resultado_atual)
+
+        self.array_resultados[index] = resultado_atual
+
+    def inserir_nomes_na_pilha_auxiliar(self, nome, resultado: Resultado):
+        condicao = True
+
+        """
+        Basicamente utilizamos dois loops:
+        primeiro loop => joga os dados da pilha principal na pilha auxiliar
+        segundo loop => joga os dados da pilha auxiliar na pilha principal 
+        """
+        while(condicao):
+            """
+            Se a pilha_principal esta vazia, significa que 
+            o processo de mover da pilha principal para a 
+            pilha auxiliar foi concuido.
+            """
+            esta_vazia = self.pilha_principal.esta_vazia()
+
+            if(esta_vazia):
+                self.pilha_auxiliar.empilhar(nome)
+                self.reenserir_nomes_na_pilha_principal(resultado)
+                break
+            elif(self.verifica_ordenacao(self.pilha_principal.elemento_topo(), nome)):
+                nome_pop = self.pilha_principal.desempilhar()
+                resultado.pops += 1
+                self.pilha_auxiliar.empilhar(nome_pop)
+            else:
+                self.pilha_auxiliar.empilhar(nome)
+                self.reenserir_nomes_na_pilha_principal(resultado)
+                break
+
+    def reenserir_nomes_na_pilha_principal(self, resultado_atual: Resultado):
+        condicao = self.pilha_auxiliar.esta_vazia()
+        while(not condicao):
+            nome = self.pilha_auxiliar.desempilhar()
+            resultado_atual.pushes += f" push-{nome}"
+            self.pilha_principal.empilhar(nome)
+            condicao = self.pilha_auxiliar.esta_vazia()
+    # Poe dois nomes em um array e verifica se estao ordenados
+
+    def verifica_ordenacao(self, a, b):
+        array_temporario = self.criar_array(2)
+        array_temporario[0] = a
+        array_temporario[1] = b
+
+        self.merge_sort(array_temporario, 0, len(array_temporario) - 1)
+
+        if(array_temporario == [a, b]):
+            return False
+        return True
+
 
 class RespostaRL1Q2(Base):
 
-    matriz_inicial = None
-    array_pilha = None
-
     def __init__(self, arquivo):
         self.arquivo = arquivo
+        self.matriz_inicial = None
+        self.array_pilha = None
         self.executar()
 
     def tratar_arquivo(self, arquivo):
@@ -126,13 +222,12 @@ class RespostaRL1Q2(Base):
     def criar_array_pilha(self, matriz):
         tamanho = len(matriz)
         array_temporaria = self.criar_array(tamanho)
-        
+
         for i in range(tamanho):
-            tamanho_linha = len(matriz[i])
-            array_temporaria[i] = PilhaComposta(tamanho_linha)
-        
+            linha_atual = matriz[i]
+            array_temporaria[i] = PilhaComposta(linha_atual)
+
         return array_temporaria
-    
 
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
