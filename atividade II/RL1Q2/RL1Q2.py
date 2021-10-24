@@ -189,8 +189,8 @@ class PilhaComposta(Base):
             resultado_atual.pushes += f" push-{nome}"
             self.pilha_principal.empilhar(nome)
             condicao = self.pilha_auxiliar.esta_vazia()
+    
     # Poe dois nomes em um array e verifica se estao ordenados
-
     def verifica_ordenacao(self, a, b):
         array_temporario = self.criar_array(2)
         array_temporario[0] = a
@@ -202,6 +202,13 @@ class PilhaComposta(Base):
             return False
         return True
 
+    def resultado_string(self):
+        tamanho = len(self.array_resultados)
+        resultado = ""
+        for i in range(tamanho):
+            resultado += self.array_resultados[i].escrever_resultado()+" "
+        return resultado.strip()
+            
 
 class RespostaRL1Q2(Base):
 
@@ -229,10 +236,20 @@ class RespostaRL1Q2(Base):
 
         return array_temporaria
 
+    def escrever_arquivo(self):
+        resposta = open('L1Q2.out', 'w')
+        array = self.array_pilha
+        for i in range(len(array)):
+            resposta.write(array[i].resultado_string())
+            if(i < len(array)-1):
+                resposta.write("\n")
+        resposta.close()
+    
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
         self.matriz_inicial = self.tratar_arquivo(self.arquivo)
         self.array_pilha = self.criar_array_pilha(self.matriz_inicial)
+        self.escrever_arquivo()
 
 
 resposta = RespostaRL1Q2(arquivo)
