@@ -1,4 +1,5 @@
-# arquivo = open('L1Q3.in', 'r').readlines()
+arquivo = open('L1Q3.in', 'r').readlines()
+
 
 class Base():
 
@@ -106,7 +107,10 @@ class ListaSimples():
         if self._tamanho > 1:
             r = ""
             for i in range(self._tamanho):
-                r = r + str(ponteiro.chave) + "->"
+                if i == self._tamanho - 1:
+                    r = r + str(ponteiro.chave)
+                else:
+                    r = r + str(ponteiro.chave) + "->"
                 ponteiro = ponteiro.proximo
             return r
         return ""
@@ -118,7 +122,7 @@ class ListaSimples():
 class NoDuplo():
     def __init__(self, chave):
         self.chave = chave
-        self.lista_simples = None
+        self.lista_simples = ListaSimples()
         self.proximo = None
         self.anterior = None
 
@@ -128,7 +132,14 @@ class ListaDupla():
         self.cabeca = None
         self._tamanho = 0
 
-    def inserir(self, chave):
+    def inserir(self, chave, tipo="inteiro"):
+        if tipo == "inteiro":
+            self.inserir_inteiro(chave)
+        else:
+
+            self.inserir_real(chave)
+
+    def inserir_inteiro(self, chave):
 
         if self.cabeca:
             ponteiro = self.cabeca
@@ -141,45 +152,91 @@ class ListaDupla():
             self.cabeca = NoDuplo(chave)
             self._tamanho += 1
 
+    def inserir_real(self, chave):
+        chave_atual = int(chave)
+        ponteiro = self.cabeca
+        condicao = True
+        while(condicao):
+            if ponteiro == None:
+                return
+            
+            if ponteiro.chave == chave_atual:
+                ponteiro.lista_simples.inserir(chave)
+                return
+            ponteiro = ponteiro.proximo
+
     def __len__(self):
         return self._tamanho
 
     def __repr__(self):
         if self._tamanho > 0:
-            r = "[("
+            r = "["
             ponteiro = self.cabeca
             while(ponteiro):
-                r = r + str(ponteiro.chave) + "->"
+                if(ponteiro.proximo == None):
+                    resultado = f"{ponteiro.chave}({ponteiro.lista_simples.__str__()})"
+                else:
+                    resultado = f"{ponteiro.chave}({ponteiro.lista_simples.__str__()})->"
+
                 ponteiro = ponteiro.proximo
-            r = r + ")]"
+                r = r + resultado
+            r = r + "]"
             return r
         return ""
 
     def __str__(self):
         return self.__repr__()
 
-
 class RespostaRL1Q2(Base):
 
     def __init__(self, arquivo):
         self.arquivo = arquivo
         self.matriz_inicial = None
-        self.array_pilha = None
+        self.array_listas = None
         self.executar()
 
     def tratar_arquivo(self, arquivo):
         tamanho = len(arquivo)
         matriz_temporaria = self.criar_array(tamanho)
         for i in range(tamanho):
-            linha_atual = arquivo[i].strip().split(" ")
-            matriz_temporaria[i] = linha_atual
+            linha_atual_LE = arquivo[i].strip().split("LI")[0].replace("LE", "").strip().split(" ")
+            linha_atual_LI = arquivo[i].strip().split("LI")[1].strip().split(" ")
+            for j in range(len(linha_atual_LE)):
+                linha_atual_LE[j] = eval(linha_atual_LE[j])
+            for j in range(len(linha_atual_LI)):
+                linha_atual_LI[j] = eval(linha_atual_LI[j])
+            self.merge_sort(linha_atual_LE, 0, len(linha_atual_LE) - 1)
+            self.merge_sort(linha_atual_LI, 0, len(linha_atual_LI) - 1)
+            array_temporario = self.criar_array(2)
+            array_temporario[0] = linha_atual_LE
+            array_temporario[1] = linha_atual_LI
+            matriz_temporaria[i] = array_temporario
         return matriz_temporaria
 
+    def criar_array_listas(self):
+        tamanho = len(self.matriz_inicial)
+        array_temporario = self.criar_array(tamanho)
+        for i in range(tamanho):
+            lista = ListaDupla()
+            linha_atual = self.matriz_inicial[i]
+            
+            le = linha_atual[0]
+            for j in range(len(le)):
+                lista.inserir(le[j])    
+            
+            li = linha_atual[1]
+            for j in range(len(li)):
+                lista.inserir(li[j], tipo="reais") 
+            array_temporario[i] = lista.__str__()
+        self.array_listas = array_temporario
+            
+            
+    
     def escrever_arquivo(self):
-        resposta = open('L1Q3.test.out', 'w')
-        array = self.array_pilha
+        resposta = open('L1Q3.out', 'w')
+        array = self.array_listas
         for i in range(len(array)):
-            resposta.write(array[i].resultado_string())
+            resposta.write(array[i].__str__())
             if(i < len(array)-1):
                 resposta.write("\n")
         resposta.close()
@@ -187,12 +244,7 @@ class RespostaRL1Q2(Base):
     def executar(self):
         # Executar os metodos e atribuir valor aos atributos da classe de forma ordenada
         self.matriz_inicial = self.tratar_arquivo(self.arquivo)
+        self.criar_array_listas()
+        self.escrever_arquivo()
 
-# resposta = RespostaRL1Q2(arquivo)
-
-
-lista_simples = ListaSimples()
-for i in range(10):
-    lista_simples.inserir(i)
-
-print(lista_simples)
+resposta = RespostaRL1Q2(arquivo)
