@@ -1,5 +1,6 @@
 ROOT = "root"
-arquivo = open('L2Q1.in', 'r').readlines()
+file = open('L2Q1.in', 'r').readlines()
+
 
 class NodeQueue:
     def __init__(self, data):
@@ -65,6 +66,7 @@ class Node:
         self.data = data
         self.left = None
         self.right = None
+        self.predecessor = None
 
     def __str__(self):
         return str(self.data)
@@ -101,8 +103,8 @@ class BinaryTree:
     def height(self, node=None):
         if node is None:
             node = self.root
-        hleft = 0
-        hright = 0
+        hleft = -1
+        hright = -1
         if node.left:
             hleft = self.height(node.left)
         if node.right:
@@ -127,6 +129,9 @@ class BinaryTree:
 
 
 class BinarySearchTree(BinaryTree):
+
+    heights = "0"
+
     def insert(self, value):
         parent = None
         x = self.root
@@ -141,8 +146,12 @@ class BinarySearchTree(BinaryTree):
             self.root = Node(value)
         elif value < parent.data:
             parent.left = Node(value)
+            parent.left.predecessor = parent
+            self.height_node(parent.left)
         else:
             parent.right = Node(value)
+            parent.right.predecessor = parent
+            self.height_node(parent.right)
 
     def search(self, value):
         return self._search(value, self.root)
@@ -157,19 +166,26 @@ class BinarySearchTree(BinaryTree):
             return self._search(value, node.left)
         return self._search(value, node.right)
 
+    def height_node(self, node):
+        height = -1
+        while node != None:
+            node = node.predecessor
+            height+= 1
+        self.heights = f"{self.heights} {height}"
+    
     def min(self, node=ROOT):
         if node == ROOT:
             node = self.root
         while node.left:
             node = node.left
-        return node.data
+        return node
 
     def max(self, node=ROOT):
         if node == ROOT:
             node = self.root
         while node.right:
             node = node.right
-        return node.data
+        return node
 
     def remove(self, value, node=ROOT):
         if node == ROOT:
@@ -193,7 +209,51 @@ class BinarySearchTree(BinaryTree):
                 node.right = self.remove(substitute, node.right)
         return node
 
+    def __repr__(self):
+        return f"{self.heights} max {self.max()} alt {self.height()} pred {self.max().predecessor} "
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class RL2Q1():
-    pass
+    def __init__(self):
+        self.process_file()
+        self.create_tree_list()
+        self.create_file()
+
+    def process_file(self):
+        length = len(file)
+        self.processed_data = [None]*length
+        for i in range(length):
+            current_line = file[i].strip().split(" ")
+            line_length = len(current_line)
+            for j in range(line_length):
+                current_line[j] = eval(current_line[j])
+            self.processed_data[i] = current_line
+
+    def create_tree_list(self):
+        current_list = self.processed_data
+        length = len(current_list)
+        self.list_tree = [None]*length
+
+        for i in range(length):
+            bst = BinarySearchTree()
+            line_length = len(current_list[i])
+            for j in range(line_length):
+                current_value = current_list[i][j]
+                bst.insert(current_value)
+            self.list_tree[i] = bst
+    def create_file(self):
+        response = open('L2Q1.out', 'w')
+        array = self.list_tree
+        for i in range(len(array)):
+            response.write(array[i].__str__().strip())
+            if(i < len(array)-1):
+                response.write("\n")
+        response.close()
+        
+        
+
+
+RL2Q1()
